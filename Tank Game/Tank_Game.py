@@ -1,4 +1,3 @@
-
 import turtle
 import math
 import random
@@ -6,7 +5,7 @@ import random
 class screensetup:
     screen = turtle.Screen()
     screen.setup(500,500)
-    screen.setworldcoordinates(0,0,200.0,200.0)
+    screen.setworldcoordinates(-150.0,-150.0,150.0,150.0)
     screen.tracer(0)  
     turtle.speed(0) 
     turtle.hideturtle()
@@ -62,10 +61,30 @@ class tanks:
         self.v=velocity
         
     def collisionPrevention(self, enemy):
+        # create a world boarder for enimes and user.
+        if self.x >= 150:
+            self.x = 150
+        if self.x <= -150:
+            self.x = -150
+        if self.y >= 150:
+            self.y = 150
+        if self.y <= -150:
+            self.y = -150
+            
+        if enemy.x >= 150:
+            enemy.x = 150
+        if enemy.x <= -150:
+            enemy.x = -150
+        if enemy.y >= 150:
+            enemy.y = 150
+        if enemy.y <= -150:
+            enemy.y = -150
+
+        
         # Calculate the difference in x and y coordinates of two tanks
         dx = self.x - enemy.x
         dy = self.y - enemy.y
-
+        
         # Calculate the distance between two tanks using the Pythagorean theorem
         distance = math.sqrt(dx**2 + dy**2)
 
@@ -86,12 +105,11 @@ class tanks:
             self.y += uy * overlap / 2
             enemy.x -= ux * overlap / 2  
             enemy.y -= uy * overlap / 2
-'''            
+            
             if self.v > 0 and math.cos(self.angle) * ux + math.sin(self.angle) * uy > 0:
                 self.v = 0
             if enemy.v > 0 and math.cos(enemy.angle) * ux + math.sin(enemy.angle) * uy > 0:
                 enemy.v = 0
-'''
 
 class keyboard:
     def __init__(self,tank):
@@ -106,7 +124,7 @@ class keyboard:
         screensetup.screen.onkeyrelease(self.krightstop, "Right")
         screensetup.screen.onkeypress(self.kend, "Escape")
     def kmove(self):  
-        keyboard.tank.controlvelocity(.2)
+        keyboard.tank.controlvelocity(1)
     def kstop(self):
         keyboard.tank.controlvelocity(0)
     def kleft(self):
@@ -140,25 +158,10 @@ while not keyboard.end:
         enemy[i].draw()
         user.collisionPrevention(enemy[i])
         
-    if enemy[i].x >= 150:
-        enemy[i].x = 150
-    if enemy[i].x <= -150:
-        enemy[i].x = -150
-    if enemy[i].y >= 150:
-        enemy[i].y = 150
-    if enemy[i].y <= -150:
-        enemy[i].y = -150
+
 
     user.move()
     user.draw()
 
-    if user.x >= 150:
-        user.x = 150
-    if user.x <= -150:
-        user.x = -150
-    if user.y >= 150:
-        user.y = 150
-    if user.y <= -150:
-        user.y = -150
-    screensetup.screen.update()
 
+    screensetup.screen.update()
