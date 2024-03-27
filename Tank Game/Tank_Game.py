@@ -59,9 +59,14 @@ class tanks:
 
     def controlvelocity(self,velocity):
         self.v=velocity
-        
-    def collisionPrevention(self, enemy):
-        # create a world boarder for enimes and user.
+    
+
+    
+    def distanceTo(self, other):
+        dx = self.x - other.x
+        dy = self.y - other.y
+        return math.sqrt(dx**2 + dy**2)
+    def checkBorder(self):
         if self.x >= 150:
             self.x = 150
         if self.x <= -150:
@@ -70,23 +75,16 @@ class tanks:
             self.y = 150
         if self.y <= -150:
             self.y = -150
-            
-        if enemy.x >= 150:
-            enemy.x = 150
-        if enemy.x <= -150:
-            enemy.x = -150
-        if enemy.y >= 150:
-            enemy.y = 150
-        if enemy.y <= -150:
-            enemy.y = -150
+    def collisionPrevention(self, enemy):
+        # create a world boarder for enimes and user.
+        self.checkBorder()
+        enemy.checkBorder()
 
-        
         # Calculate the difference in x and y coordinates of two tanks
         dx = self.x - enemy.x
         dy = self.y - enemy.y
         
-        # Calculate the distance between two tanks using the Pythagorean theorem
-        distance = math.sqrt(dx**2 + dy**2)
+        distance = self.distanceTo(enemy)
 
         # Calculate the sum of the radii of the two tanks
         sumOfRadii = self.size + enemy.size
@@ -105,11 +103,6 @@ class tanks:
             self.y += uy * overlap / 2
             enemy.x -= ux * overlap / 2  
             enemy.y -= uy * overlap / 2
-            
-            if self.v > 0 and math.cos(self.angle) * ux + math.sin(self.angle) * uy > 0:
-                self.v = 0
-            if enemy.v > 0 and math.cos(enemy.angle) * ux + math.sin(enemy.angle) * uy > 0:
-                enemy.v = 0
 
 class keyboard:
     def __init__(self,tank):
@@ -138,6 +131,16 @@ class keyboard:
     def kend(self):
         keyboard.end=1
 
+def insertionSort(A):
+    for i in range(1,len(A)):
+        key = A[i]
+        j = i - 1
+        while j>=0 and key < A[j]:
+            A[j+1] = A[j]
+            j -= 1
+        A[j+1] = key
+    return A
+
 user=tanks(10,10,0,5,0,10,"blue",0,0,0)
 keyboard(user)
 
@@ -149,19 +152,26 @@ for i in range(numtanks):
 while not keyboard.end: 
     turtle.clear()
     
+
     for i in range(numtanks):
         for j in range(i + 1, numtanks):
             enemy[i].collisionPrevention(enemy[j])
         
         enemy[i].target(user.x,user.y)
-        enemy[i].move()
+        #enemy[i].move()
         enemy[i].draw()
         user.collisionPrevention(enemy[i])
-        
-
-
     user.move()
     user.draw()
 
+    distances = [(i,user.distanceTo(enemy[i])) for i in range(numtanks)]
+    distances = insertionSort(distances)
+    
+    
 
+    
+    print(f"{'Tank Index/':<10}{'Distance':<10}")
+    for i, distance in distances:
+        print(f"{i:<10}{distance:<10.2f}")
+        
     screensetup.screen.update()
