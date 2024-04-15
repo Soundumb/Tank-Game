@@ -111,7 +111,8 @@ class tanks:
 class keyboard:
     def __init__(self,tank):
         keyboard.tank = tank
-        keyboard.end=0
+        keyboard.end = 0
+        keyboard.gridSize = 1
         screensetup.screen.listen() 
         screensetup.screen.onkeypress(self.kmove, "Up") 
         screensetup.screen.onkeyrelease(self.kstop, "Up")
@@ -120,6 +121,10 @@ class keyboard:
         screensetup.screen.onkeypress(self.kright, "Right")
         screensetup.screen.onkeyrelease(self.krightstop, "Right")
         screensetup.screen.onkeypress(self.kend, "Escape")
+
+        screensetup.screen.onkeypress(self.increaseGridSize, "plus")  # Increase grid size
+        screensetup.screen.onkeypress(self.decreaseGridSize, "minus")  # Decrease grid size
+
     def kmove(self):  
         keyboard.tank.controlvelocity(1)
     def kstop(self):
@@ -134,6 +139,13 @@ class keyboard:
         keyboard.tank.controlrotation(0)
     def kend(self):
         keyboard.end=1
+    def increaseGridSize(self):
+        if keyboard.gridSize < 50:  # Set a maximum limit to prevent the grid from getting too dense
+            keyboard.gridSize += 1
+
+    def decreaseGridSize(self):
+        if keyboard.gridSize > 1:  # Set a minimum limit to prevent the grid from disappearing
+            keyboard.gridSize -= 1
 
 def insertionSort(A):
     # Iterate over the array from the second element (index 1) to the end
@@ -153,10 +165,31 @@ def insertionSort(A):
     # return sorted array A
     return A
 
+def drawGrid(N):
+    # Calculate the size of each cell
+    cellSize = 300.0 / N  # Assuming the world coordinates range from -150 to 150
+
+    # Draw vertical lines
+    for i in range(N+1):
+        x = -150 + i * cellSize
+        turtle.penup()
+        turtle.goto(x, -150)
+        turtle.pendown()
+        turtle.goto(x, 150)
+
+    # Draw horizontal lines
+    for i in range(N+1):
+        y = -150 + i * cellSize
+        turtle.penup()
+        turtle.goto(-150, y)
+        turtle.pendown()
+        turtle.goto(150, y)
+
+
 
 user=tanks(10,10,0,5,0,10,"blue",0,0,0)
 keyboard(user)
-
+N=10
 numtanks= 4
 enemy = [] 
 for i in range(numtanks):    
@@ -164,6 +197,7 @@ for i in range(numtanks):
 
 while not keyboard.end: 
     turtle.clear()
+    drawGrid(keyboard.gridSize) 
     
 
     for i in range(numtanks):
