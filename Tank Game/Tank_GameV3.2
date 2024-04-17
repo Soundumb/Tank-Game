@@ -107,12 +107,14 @@ class tanks:
             self.y += uy * overlap / 2
             enemy.x -= ux * overlap / 2  
             enemy.y -= uy * overlap / 2
-
+    
 class keyboard:
-    def __init__(self,tank):
+    def __init__(self, tank):
         keyboard.tank = tank
         keyboard.end = 0
         keyboard.gridSize = 1
+        keyboard.gridSizeMax=10
+        keyboard.obstacleGrid = [[False for i in range(self.gridSizeMax)] for j in range(self.gridSizeMax)] # set up the initial obsticle grid to all FALSE
         screensetup.screen.listen() 
         screensetup.screen.onkeypress(self.kmove, "Up") 
         screensetup.screen.onkeyrelease(self.kstop, "Up")
@@ -121,9 +123,9 @@ class keyboard:
         screensetup.screen.onkeypress(self.kright, "Right")
         screensetup.screen.onkeyrelease(self.krightstop, "Right")
         screensetup.screen.onkeypress(self.kend, "Escape")
-
         screensetup.screen.onkeypress(self.increaseGridSize, "plus")  # Increase grid size
         screensetup.screen.onkeypress(self.decreaseGridSize, "minus")  # Decrease grid size
+        screensetup.screen.onscreenclick(self.mouseClick)
 
     def kmove(self):  
         keyboard.tank.controlvelocity(1)
@@ -140,12 +142,52 @@ class keyboard:
     def kend(self):
         keyboard.end=1
     def increaseGridSize(self):
-        if keyboard.gridSize < 10:  # Set a maximum limit of 10
+        if keyboard.gridSize < keyboard.gridSizeMax:  #maximum limit of 10
             keyboard.gridSize += 1
-
     def decreaseGridSize(self):
-        if keyboard.gridSize > 1:  # Set a minimum limit of 1
+        if keyboard.gridSize > 1:  #minimum limit 1
             keyboard.gridSize -= 1
+    def mouseClick(self, x, y):
+        # Convert screen coordinates given from onscreenclick to grid indices
+        gridX = int((x + 150) // (300.0 / self.gridSize))
+        gridY = int((y + 150) // (300.0 / self.gridSize))
+        # Toggle the obstacle state from true/false if the click is within the grid bounds
+        if 0 <= gridX < self.gridSize and 0 <= gridY < self.gridSize:
+            self.obstacleGrid[gridY][gridX] = not self.obstacleGrid[gridY][gridX]
+            drawGrid(self.gridSize)  # Redraw the grid with updated obstacles
+
+def drawGrid(N):
+    # Calculate the size of each cell
+    cellSize = 300.0 / N  # Assuming the world coordinates range from -150 to 150
+    # Draw vertical lines
+    turtle.pencolor('black')
+    for i in range(N+1):
+        x = -150 + i * cellSize
+        turtle.penup()
+        turtle.goto(x, -150)
+        turtle.pendown()
+        turtle.goto(x, 150)
+
+    # Draw horizontal lines
+    for i in range(N+1):
+        y = -150 + i * cellSize
+        turtle.penup()
+        turtle.goto(-150, y)
+        turtle.pendown()
+        turtle.goto(150, y)
+    for i in range(N):
+        for j in range(N):
+            if keyboard.obstacleGrid[i][j]:  # Access the obstacleGrid from the keyboard instance if TRUE and draw the obsticle
+                turtle.penup()
+                turtle.goto(-150 + j * cellSize, -150 + i * cellSize)
+                turtle.pendown()
+                turtle.begin_fill()
+                turtle.fillcolor('black')
+                turtle.pencolor('white')
+                for k in range(4):
+                    turtle.forward(cellSize)
+                    turtle.left(90)
+                turtle.end_fill()
 
 def insertionSort(A):
     # Iterate over the array from the second element (index 1) to the end
@@ -165,31 +207,9 @@ def insertionSort(A):
     # return sorted array A
     return A
 
-def drawGrid(N):
-    # Calculate the size of each cell based on the world coordinates
-    cellSize = 300.0 / N  
-
-    # Draw vertical lines
-    for i in range(N+1):
-        x = -150 + i * cellSize
-        turtle.penup()
-        turtle.goto(x, -150)
-        turtle.pendown()
-        turtle.goto(x, 150)
-
-    # Draw horizontal lines
-    for i in range(N+1):
-        y = -150 + i * cellSize
-        turtle.penup()
-        turtle.goto(-150, y)
-        turtle.pendown()
-        turtle.goto(150, y)
-
-
 
 user=tanks(10,10,0,5,0,10,"blue",0,0,0)
 keyboard(user)
-N=10
 numtanks= 4
 enemy = [] 
 for i in range(numtanks):    
@@ -197,17 +217,16 @@ for i in range(numtanks):
 
 while not keyboard.end: 
     turtle.clear()
-    drawGrid(keyboard.gridSize) 
-    
-
+    drawGrid(keyboard.gridSize)
     for i in range(numtanks):
         for j in range(i + 1, numtanks):
             enemy[i].collisionPrevention(enemy[j])
         
         enemy[i].target(user.x,user.y)
+        user.collisionPrevention(enemy[i])
         enemy[i].move()
         enemy[i].draw()
-        user.collisionPrevention(enemy[i])
+        
     user.move()
     user.draw()
 
