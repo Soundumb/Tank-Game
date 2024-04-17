@@ -140,11 +140,11 @@ class keyboard:
     def kend(self):
         keyboard.end=1
     def increaseGridSize(self):
-        if keyboard.gridSize < 50:  # Set a maximum limit to prevent the grid from getting too dense
+        if keyboard.gridSize < 10:  # Set a maximum limit of 10
             keyboard.gridSize += 1
 
     def decreaseGridSize(self):
-        if keyboard.gridSize > 1:  # Set a minimum limit to prevent the grid from disappearing
+        if keyboard.gridSize > 1:  # Set a minimum limit of 1
             keyboard.gridSize -= 1
 
 def insertionSort(A):
@@ -166,8 +166,8 @@ def insertionSort(A):
     return A
 
 def drawGrid(N):
-    # Calculate the size of each cell
-    cellSize = 300.0 / N  # Assuming the world coordinates range from -150 to 150
+    # Calculate the size of each cell based on the world coordinates
+    cellSize = 300.0 / N  
 
     # Draw vertical lines
     for i in range(N+1):
